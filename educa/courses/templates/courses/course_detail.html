@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block content %}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    
+    .course-detail-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .back-link:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .course-header {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .course-badge {
+        display: inline-block;
+        padding: 8px 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .course-header h1 {
+        font-size: 36px;
+        color: #2d3748;
+        margin: 0 0 15px 0;
+        background: none;
+        padding: 0;
+    }
+    
+    .course-overview {
+        color: #4a5568;
+        line-height: 1.8;
+        font-size: 16px;
+        margin: 20px 0;
+    }
+    
+    .course-meta {
+        display: flex;
+        gap: 30px;
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 2px solid #e2e8f0;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #718096;
+    }
+    
+    .meta-item strong {
+        color: #2d3748;
+    }
+    
+    .course-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: white;
+        color: #e53e3e;
+        border: 2px solid #e53e3e;
+    }
+    
+    .btn-danger:hover {
+        background: #e53e3e;
+        color: white;
+    }
+    
+    .modules-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .section-title {
+        font-size: 28px;
+        margin: 0;
+        background: none;
+        padding: 0;
+        color: #2d3748;
+    }
+    
+    .modules-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .module-item {
+        background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .module-item:hover {
+        border-color: #667eea;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+    }
+    
+    .module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .module-title {
+        font-size: 20px;
+        color: #2d3748;
+        margin: 0 0 10px 0;
+        font-weight: 600;
+    }
+    
+    .module-description {
+        color: #718096;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .module-order {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    
+    .empty-modules {
+        text-align: center;
+        padding: 60px 20px;
+        color: #a0aec0;
+    }
+    
+    .empty-modules-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+    
+    .empty-modules h3 {
+        font-size: 24px;
+        margin: 0 0 10px 0;
+        color: #4a5568;
+    }
+    
+    @media (max-width: 768px) {
+        .course-header {
+            padding: 30px 20px;
+        }
+        
+        .course-header h1 {
+            font-size: 28px;
+        }
+        
+        .modules-section {
+            padding: 30px 20px;
+        }
+        
+        .course-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="course-detail-wrapper">
+    <a href="{% url 'profile' %}" class="back-link">
+        ← Back to Profile
+    </a>
+    
+    <div class="course-header">
+        <span class="course-badge">{{ course.subject.title }}</span>
+        <h1>{{ course.title }}</h1>
+        <p class="course-overview">{{ course.overview }}</p>
+        
+        <div class="course-meta">
+            <div class="meta-item">
+                <span>📅</span>
+                <span><strong>Created:</strong> {{ course.created|date:"F d, Y" }}</span>
+            </div>
+            <div class="meta-item">
+                <span>📚</span>
+                <span><strong>Modules:</strong> {{ modules.count }}</span>
+            </div>
+            <div class="meta-item">
+                <span>🔗</span>
+                <span><strong>Slug:</strong> {{ course.slug }}</span>
+            </div>
+        </div>
+        
+        <div class="course-actions">
+            <a href="{% url 'module_create' course.id %}" class="btn btn-primary">
+                ➕ Add Module
+            </a>
+            <a href="{% url 'course_edit' course.id %}" class="btn btn-secondary">
+                ✏️ Edit Course
+            </a>
+            <a href="{% url 'course_delete' course.id %}" class="btn btn-danger">
+                🗑️ Delete Course
+            </a>
+        </div>
+    </div>
+    
+    <div class="modules-section">
+        <div class="section-header">
+            <h2 class="section-title">Course Modules</h2>
+        </div>
+        
+        {% if modules %}
+            <ul class="modules-list">
+                {% for module in modules %}
+                <li class="module-item">
+                    <div class="module-header">
+                        <div style="flex: 1;">
+                            <h3 class="module-title">{{ module.title }}</h3>
+                            {% if module.description %}
+                                <p class="module-description">{{ module.description }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="module-order">{{ module.order|add:1 }}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-modules">
+                <div class="empty-modules-icon">📝</div>
+                <h3>No Modules Yet</h3>
+                <p>Start building your course by adding modules!</p>
+                <a href="{% url 'module_create' course.id %}" class="btn btn-primary" style="margin-top: 20px;">
+                    Add First Module
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

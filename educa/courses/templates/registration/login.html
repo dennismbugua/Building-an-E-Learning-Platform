@@ -1,22 +1,541 @@
 {% extends "base.html" %}
 
-{% block title %}Log-in{% endblock %}
+{% block title %}Welcome Back - Login{% endblock %}
 
 {% block content %}
-  <h1>Log-in</h1>
-  <div class="module">
-    {% if form.errors %}
-      <p>Your username and password didn't match. Please try again.</p>
-    {% else %}
-      <p>Please, use the following form to log-in:</p>
-    {% endif %}
-    <div class="login-form">
-      <form action="{% url 'login' %}" method="post">
-        {{ form.as_p }}
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next }}" />
-        <p><input type="submit" value="Log-in"></p>
-      </form>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Animated background elements */
+    .login-wrapper::before,
+    .login-wrapper::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        animation: float 20s infinite ease-in-out;
+    }
+    
+    .login-wrapper::before {
+        width: 500px;
+        height: 500px;
+        top: -250px;
+        right: -250px;
+        animation-delay: 0s;
+    }
+    
+    .login-wrapper::after {
+        width: 400px;
+        height: 400px;
+        bottom: -200px;
+        left: -200px;
+        animation-delay: 5s;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-50px) rotate(180deg);
+        }
+    }
+    
+    .login-container {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 1000px;
+        width: 100%;
+        display: flex;
+        position: relative;
+        z-index: 1;
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .login-left {
+        flex: 1;
+        padding: 60px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .login-right {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-right::before {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .login-right::after {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        bottom: -50px;
+        left: -50px;
+    }
+    
+    .brand-logo {
+        font-size: 48px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .brand-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .brand-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        text-align: center;
+        line-height: 1.6;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .features-list {
+        list-style: none;
+        margin-top: 40px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .features-list li {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        font-size: 15px;
+        opacity: 0.95;
+    }
+    
+    .features-list li::before {
+        content: '✓';
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    
+    .login-header {
+        margin-bottom: 40px;
+    }
+    
+    .login-header h1 {
+        font-size: 32px;
+        color: #2d3748;
+        margin: 0 0 10px 0;
+        background: none;
+        padding: 0;
+        font-weight: 700;
+    }
+    
+    .login-header p {
+        color: #718096;
+        font-size: 15px;
+        margin: 0;
+    }
+    
+    .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+    
+    .alert-error {
+        background: #fff5f5;
+        border: 2px solid #fc8181;
+        color: #c53030;
+    }
+    
+    .alert-info {
+        background: #ebf8ff;
+        border: 2px solid #63b3ed;
+        color: #2c5282;
+    }
+    
+    .alert-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    
+    .login-form {
+        width: 100%;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        color: #2d3748;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #f7fafc;
+    }
+    
+    .form-group input[type="text"]:focus,
+    .form-group input[type="password"]:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group input[type="text"]::placeholder,
+    .form-group input[type="password"]::placeholder {
+        color: #a0aec0;
+    }
+    
+    .form-actions {
+        margin-top: 35px;
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-login:active {
+        transform: translateY(0);
+    }
+    
+    .form-footer {
+        margin-top: 30px;
+        text-align: center;
+        padding-top: 25px;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .form-footer a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .form-footer a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    
+    .form-footer p {
+        color: #718096;
+        font-size: 14px;
+        margin: 0 0 10px 0;
+    }
+    
+    .helptext {
+        display: block;
+        font-size: 12px;
+        color: #718096;
+        margin-top: 6px;
+        font-style: italic;
+    }
+    
+    .errorlist {
+        list-style: none;
+        margin: 8px 0 0 0;
+        padding: 0;
+    }
+    
+    .errorlist li {
+        color: #e53e3e;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .errorlist li::before {
+        content: '⚠';
+        font-size: 14px;
+    }
+    
+    /* Hide Django's default form rendering and use custom */
+    .login-form form > p {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .login-container {
+            flex-direction: column;
+        }
+        
+        .login-right {
+            order: -1;
+            padding: 40px 30px;
+        }
+        
+        .login-left {
+            padding: 40px 30px;
+        }
+        
+        .login-header h1 {
+            font-size: 28px;
+        }
+        
+        .brand-title {
+            font-size: 26px;
+        }
+        
+        .features-list {
+            margin-top: 25px;
+        }
+        
+        .login-wrapper::before,
+        .login-wrapper::after {
+            display: none;
+        }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <!-- Left Side - Login Form -->
+        <div class="login-left">
+            <div class="login-header">
+                <h1>Welcome Back! 👋</h1>
+                <p>Please login to access your e-learning dashboard</p>
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-error">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>Login Failed!</strong>
+                        <p style="margin: 5px 0 0 0;">Your username and password didn't match. Please try again.</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <div>
+                        <p style="margin: 0;">Enter your credentials to continue learning</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="login-form">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        <input type="text" 
+                              autocomplete="off"
+                               name="username" 
+                               id="id_username"
+                               placeholder="Enter your username"
+                               value="{{ form.username.value|default:'' }}"
+                               required
+                               autofocus>
+                        {% if form.username.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.username.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if form.username.help_text %}
+                            <span class="helptext">{{ form.username.help_text }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password">Password</label>
+                        <input type="password" 
+                              autocomplete="off"
+                               name="password" 
+                               id="id_password"
+                               placeholder="Enter your password"
+                               required>
+                        {% if form.password.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.password.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if form.password.help_text %}
+                            <span class="helptext">{{ form.password.help_text }}</span>
+                        {% endif %}
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}" />
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-login">
+                            Log In
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-footer">
+                <p>Don't have an account? <a href="{% url 'signup' %}">Sign up now</a></p>
+                <p><a href="#">Forgot your password?</a></p>
+            </div>
+        </div>
+
+        <!-- Right Side - Branding -->
+        <div class="login-right">
+            <div class="brand-logo">🎓</div>
+            <h2 class="brand-title">E-Learning Platform</h2>
+            <p class="brand-subtitle">
+                Unlock your potential with our comprehensive learning platform. 
+                Access thousands of courses taught by expert instructors.
+            </p>
+            
+            <ul class="features-list">
+                <li>Access to premium courses and content</li>
+                <li>Learn at your own pace, anytime, anywhere</li>
+                <li>Track your progress and achievements</li>
+                <li>Join a community of passionate learners</li>
+                <li>Get certified upon course completion</li>
+            </ul>
+        </div>
     </div>
-  </div>
+</div>
+
+<script>
+    // Add smooth focus animations
+    document.querySelectorAll('input[type="text"], input[type="password"]').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+            this.parentElement.style.transition = 'transform 0.3s ease';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+
+    // Add loading state to submit button
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const btn = this.querySelector('.btn-login');
+        btn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> Logging in...';
+        btn.disabled = true;
+    });
+
+    // Add keyframe animation for loading spinner
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Auto-hide info alert after 5 seconds
+    const infoAlert = document.querySelector('.alert-info');
+    if (infoAlert) {
+        setTimeout(() => {
+            infoAlert.style.opacity = '0';
+            infoAlert.style.transform = 'translateY(-10px)';
+            infoAlert.style.transition = 'all 0.5s ease';
+            setTimeout(() => infoAlert.remove(), 500);
+        }, 5000);
+    }
+</script>
 {% endblock %}

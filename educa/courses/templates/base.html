@@ -3,25 +3,475 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Educa{% endblock %}</title>
     <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      
+      /* Top Navbar Styles */
+      .top-navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+      
+      .top-navbar.scrolled {
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+      }
+      
+      .navbar-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 70px;
+      }
+      
+      /* Logo Section */
+      .navbar-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+      }
+      
+      .navbar-logo:hover {
+        transform: scale(1.05);
+      }
+      
+      .logo-icon {
+        font-size: 32px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      }
+      
+      .logo-text {
+        color: white;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Navigation Links */
+      .navbar-menu {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+      }
+      
+      .navbar-menu li {
+        position: relative;
+      }
+      
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .nav-link:hover::before {
+        transform: translateX(0);
+      }
+      
+      .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+      }
+      
+      .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* User Section */
+      .navbar-user {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      .user-avatar:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+      
+      .user-name {
+        color: white;
+        font-weight: 600;
+        font-size: 15px;
+        display: none;
+      }
+      
+      /* Primary Button */
+      .btn-navbar {
+        background: white;
+        color: #667eea;
+        padding: 10px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 2px solid transparent;
+      }
+      
+      .btn-navbar:hover {
+        background: #f7fafc;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      .btn-navbar.btn-outline {
+        background: transparent;
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+      }
+      
+      .btn-navbar.btn-outline:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: white;
+      }
+      
+      /* Mobile Menu Toggle */
+      .mobile-menu-toggle {
+        display: none;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 24px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .mobile-menu-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      
+      /* Dropdown Menu */
+      .dropdown {
+        position: relative;
+      }
+      
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 10px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        min-width: 200px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+      
+      .dropdown:hover .dropdown-menu,
+      .dropdown-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+      
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        color: #2d3748;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+      
+      .dropdown-item:hover {
+        background: #f7fafc;
+        color: #667eea;
+      }
+      
+      .dropdown-item.danger:hover {
+        background: #fff5f5;
+        color: #e53e3e;
+      }
+      
+      /* Responsive Design */
+      @media (min-width: 768px) {
+        .user-name {
+          display: block;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .navbar-container {
+          padding: 0 20px;
+          height: 60px;
+        }
+        
+        .logo-text {
+          font-size: 24px;
+        }
+        
+        .logo-icon {
+          font-size: 28px;
+        }
+        
+        .mobile-menu-toggle {
+          display: block;
+        }
+        
+        .navbar-menu {
+          position: fixed;
+          top: 60px;
+          left: 0;
+          right: 0;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          flex-direction: column;
+          gap: 0;
+          padding: 20px;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-menu.active {
+          transform: translateX(0);
+        }
+        
+        .navbar-menu li {
+          width: 100%;
+        }
+        
+        .nav-link {
+          width: 100%;
+          justify-content: flex-start;
+          padding: 15px 20px;
+          border-radius: 10px;
+          margin-bottom: 5px;
+        }
+        
+        .navbar-user {
+          gap: 10px;
+        }
+        
+        .dropdown-menu {
+          position: fixed;
+          right: 20px;
+          left: auto;
+        }
+      }
+      
+      /* Animation for page load */
+      @keyframes slideDown {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      
+      .top-navbar {
+        animation: slideDown 0.5s ease-out;
+      }
+      
+      /* Content wrapper to account for sticky navbar */
+      .page-content {
+        min-height: calc(100vh - 70px);
+      }
+    </style>
   </head>
   <body>
-    <div id="header">
-      <a href="/" class="logo">Educa</a>
-      <ul class="menu">
-        {% if request.user.is_authenticated %}
-          <li><a href="{% url "logout" %}">Sign out</a></li>
-        {% else %}
-          <li><a href="{% url "login" %}">Sign in</a></li>
-        {% endif %}
-      </ul>
+    <!-- Stunning Top Navbar -->
+    <nav class="top-navbar" id="navbar">
+      <div class="navbar-container">
+        <!-- Logo -->
+        <a href="{% url 'home' %}" class="navbar-logo">
+          <span class="logo-icon">🎓</span>
+          <span class="logo-text">Educa</span>
+        </a>
+        
+        <!-- Navigation Menu -->
+        <ul class="navbar-menu" id="navbarMenu">
+          <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <span>🏠</span> Home
+          </a></li>
+          {% if request.user.is_authenticated %}
+            <li><a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+              <span>📊</span> Dashboard
+            </a></li>
+            <li><a href="{% url 'course_create' %}" class="nav-link">
+              <span>➕</span> Create Course
+            </a></li>
+          {% endif %}
+        </ul>
+        
+        <!-- User Section -->
+        <div class="navbar-user">
+          {% if request.user.is_authenticated %}
+            <span class="user-name">{{ request.user.username }}</span>
+            <div class="dropdown">
+              <div class="user-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+              <div class="dropdown-menu">
+                <a href="{% url 'profile' %}" class="dropdown-item">
+                  <span>👤</span> My Profile
+                </a>
+                <a href="{% url 'profile_edit' %}" class="dropdown-item">
+                  <span>⚙️</span> Settings
+                </a>
+                <a href="{% url 'logout' %}" class="dropdown-item danger">
+                  <span>🚪</span> Sign Out
+                </a>
+              </div>
+            </div>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn-navbar btn-outline">Sign In</a>
+            <a href="{% url 'signup' %}" class="btn-navbar">Get Started</a>
+          {% endif %}
+          
+          <!-- Mobile Menu Toggle -->
+          <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- Page Content -->
+    <div class="page-content">
+      <div id="content">
+        {% block content %}
+        {% endblock %}
+      </div>
     </div>
-    <div id="content">
-      {% block content %}
-      {% endblock %}
-    </div>
+    
     <script>
+      // Mobile menu toggle
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const navbarMenu = document.getElementById('navbarMenu');
+      
+      if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', () => {
+          navbarMenu.classList.toggle('active');
+          mobileMenuToggle.textContent = navbarMenu.classList.contains('active') ? '✕' : '☰';
+        });
+      }
+      
+      // Navbar scroll effect
+      const navbar = document.getElementById('navbar');
+      let lastScroll = 0;
+      
+      window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+        
+        lastScroll = currentScroll;
+      });
+      
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (navbarMenu && !navbarMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          navbarMenu.classList.remove('active');
+          if (mobileMenuToggle) {
+            mobileMenuToggle.textContent = '☰';
+          }
+        }
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        const dropdowns = document.querySelectorAll('.dropdown-menu');
+        dropdowns.forEach(dropdown => {
+          if (!dropdown.parentElement.contains(e.target)) {
+            dropdown.classList.remove('active');
+          }
+        });
+      });
+      
+      // Toggle dropdown on mobile
+      document.querySelectorAll('.user-avatar').forEach(avatar => {
+        avatar.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const dropdown = avatar.nextElementSibling;
+          if (dropdown) {
+            dropdown.classList.toggle('active');
+          }
+        });
+      });
+      
       document.addEventListener('DOMContentLoaded', (event) => {
         // DOM loaded
         {% block domready %}
