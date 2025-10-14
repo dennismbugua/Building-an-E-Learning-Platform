@@ -18,6 +18,12 @@
 - **For Students**: Deliver an engaging, distraction-free learning experience
 - **For Administrators**: Enable efficient content management and platform oversight
 
+### 🎥 **Live Demo Video**
+[![YT Video](https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074])](https://youtu.be/2M1NE42x-MM "Video Title")
+
+### 📖 **Detailed Blog Article**
+Read the full technical guide: https://dennismbugua.co.ke/articles/building-a-scalable-e-learning-platform-with-django-architecture-code-and-business-insights
+
 ---
 
 ## 💼 Business Impact
